@@ -1,12 +1,13 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
 import { ref, computed } from "vue";
+import { useRouter, RouterLink } from "vue-router";
 
 import { useNotesStore } from "@/stores/notes";
 import ViewWrapper from "@/components/ViewWrapper.vue";
 
+const router = useRouter();
 const notesStore = useNotesStore();
 
 const searchQuery = ref<string>("");
@@ -45,7 +46,19 @@ const filteredNotes = computed(() => {
           <p class="text-lg font-bold">{{ note.title }}</p>
           <p>{{ note.content }}</p>
           <div class="mt-4 flex gap-2">
-            <button class="w-full cursor-pointer rounded-md bg-blue-200 p-2">Edit</button>
+            <button
+              class="w-full cursor-pointer rounded-md bg-blue-200 p-2"
+              v-on:click="
+                router.push({
+                  name: 'add-note',
+                  query: {
+                    id: note.id,
+                  },
+                })
+              "
+            >
+              Edit
+            </button>
             <button
               class="w-full cursor-pointer rounded-md bg-red-200 p-2"
               v-on:click="() => notesStore.removeNote(note.id)"

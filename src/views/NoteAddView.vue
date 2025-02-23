@@ -1,13 +1,14 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import type { TNote } from "@/models/note";
 import { useNotesStore } from "@/stores/notes";
 import ViewWrapper from "@/components/ViewWrapper.vue";
 
+const route = useRoute();
 const router = useRouter();
 const notesStore = useNotesStore();
 
@@ -19,7 +20,16 @@ const form = ref<Omit<TNote, "id">>({
 const onSubmit = (event: Event) => {
   event.preventDefault();
 
-  notesStore.addNewNote(form.value);
+  if (route.query.id) {
+    notesStore.updateNewNote(
+      { ...form.value, id: route.query.id as string },
+      route.query.id as string,
+    );
+  } else {
+    notesStore.addNewNote(form.value);
+  }
+
+  console.log("//");
 
   form.value = {
     title: "",
@@ -28,6 +38,15 @@ const onSubmit = (event: Event) => {
 
   router.push("/");
 };
+
+onMounted(() => {
+  const id = route.query.id;
+  const note = notesStore.notes.filter((item) => item.id === id);
+
+  if (note.length > 0) {
+    form.value = note[0];
+  }
+});
 </script>
 
 <template>
@@ -56,7 +75,7 @@ const onSubmit = (event: Event) => {
         type="submit"
         class="w-full cursor-pointer rounded-md bg-green-600 px-4 py-2 text-white"
       >
-        Add Note
+        {{ $route.query.id ? "Update" : "Edit" }} Note
       </button>
     </form>
   </ViewWrapper>
