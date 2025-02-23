@@ -2,7 +2,7 @@
 
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import { ref, watch, onMounted } from "vue";
+import { ref, computed } from "vue";
 
 import { useNotesStore } from "@/stores/notes";
 import ViewWrapper from "@/components/ViewWrapper.vue";
@@ -11,12 +11,8 @@ const notesStore = useNotesStore();
 
 const searchQuery = ref<string>("");
 
-watch(searchQuery, async (newValue: string) => {
-  notesStore.searchQuery = newValue;
-});
-
-onMounted(() => {
-  searchQuery.value = notesStore.searchQuery;
+const filteredNotes = computed(() => {
+  return notesStore.notes.filter((item) => item.title.includes(searchQuery.value));
 });
 </script>
 
@@ -40,10 +36,10 @@ onMounted(() => {
         </RouterLink>
       </div>
 
-      <div class="grid grid-cols-3 gap-6" v-if="notesStore.filteredNotes.length > 0">
+      <div class="grid grid-cols-3 gap-6" v-if="filteredNotes.length > 0">
         <div
           v-bind:key="note.id"
-          v-for="note in notesStore.filteredNotes"
+          v-for="note in filteredNotes"
           class="flex flex-col gap-2 rounded-md border-2 border-green-200 p-6"
         >
           <p class="text-lg font-bold">{{ note.title }}</p>
